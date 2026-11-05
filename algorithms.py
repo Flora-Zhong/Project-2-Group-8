@@ -1,6 +1,16 @@
 import csv
 
-def data_processing(filepath):
+def data_processing(filepath: str) -> list[dict]:
+    """
+    Read a historical stock data CSV file, calculate daily returns and absolute movements,
+    and returns processed records.
+
+    Parameters:
+        filepath (string): The path to the input CSV file.
+
+    Returns:
+        A list of dictionaries containing ticker, date, close, daily_return, and absolute_movement.
+    """
     stock_history = {}
     with open(filepath, mode = "r", encoding = "utf-8") as file:
         dict_reader = csv.DictReader(file)
@@ -34,7 +44,18 @@ def data_processing(filepath):
                 processed_records.append(record)
     return processed_records
 
-def heap_sort_compare(a, b, mode):
+def heap_sort_compare(a: dict, b: dict, mode: str) -> bool:
+    """
+    Compare two stock records and see if record a has a higher priority than record b.
+
+    Parameters:
+        a (dict): The first stock record.
+        b (dict): The second stock record.
+        mode (string): The mode ("gains", "losses", or "absolute") to compare records.
+
+    Returns:
+        A boolean value indicating if record a has a higher priority than record b.
+    """
     if mode == "gains":
         if a["daily_return"] != b["daily_return"]:
             return a["daily_return"] > b["daily_return"]
@@ -48,7 +69,19 @@ def heap_sort_compare(a, b, mode):
         return a["ticker"] < b["ticker"]
     return a["date"] < b["date"]
 
-def heap_sort_sift_down(arr, n, i, mode):
+def heap_sort_sift_down(arr: list[dict], n: int, i: int, mode: str) -> None:
+    """
+    Recursively sift down the element at index i to maintain a max-heap.
+
+    Parameters:
+        arr (list[dict]): The list of stock records.
+        n (int): The size of the heap.
+        i (int): The index of the current node.
+        mode (string): The mode ("gains", "losses", or "absolute") to compare records.
+
+    Returns:
+        None.
+    """
     largest = i
     left = 2 * i + 1
     right = 2 * i + 2
@@ -60,7 +93,17 @@ def heap_sort_sift_down(arr, n, i, mode):
         arr[i], arr[largest] = arr[largest], arr[i]
         heap_sort_sift_down(arr, n, largest, mode)
 
-def heap_sort(arr, mode):
+def heap_sort(arr: list[dict], mode: str) -> None:
+    """
+    Perform heap sort on the stock records.
+
+    Parameters:
+        arr (list[dict]): The list of stock records.
+        mode (string): The mode ("gains", "losses", or "absolute") to compare records.
+
+    Returns:
+        None.
+    """
     n = len(arr)
     for i in range(n // 2 - 1, -1, -1):
         heap_sort_sift_down(arr, n, i, mode)
@@ -68,7 +111,18 @@ def heap_sort(arr, mode):
         arr[i], arr[0] = arr[0], arr[i]
         heap_sort_sift_down(arr, i, 0, mode)
 
-def top_k_heap_sort(records, k, mode="absolute"):
+def top_k_heap_sort(records: list[dict], k: int, mode: str = "absolute") -> list[dict]:
+    """
+    Find the top k records using heap sort.
+
+    Parameters:
+        records (list[dict]): The list of processed stock records.
+        k (int): The number of top records to return.
+        mode (string): The mode ("gains", "losses", or "absolute") to compare records.
+
+    Returns:
+        A list of dictionaries containing top k records.
+    """
     if not isinstance(k, int):
         raise TypeError("k must be an integer.")
     elif k < 0:
