@@ -159,6 +159,8 @@ def top_k_heap_sort(records: list[dict], k: int, mode: str = "absolute") -> list
     top_k_results = data[-actual_k:][::-1]
     return top_k_results
 
+'''Merge sort starts'''
+
 def _validate_merge_sort_arguments(k: int, mode: str) -> None:
     """Validate the public Top-K merge sort arguments."""
     if mode not in ["gains", "losses", "absolute"]:
@@ -237,9 +239,6 @@ def _merge_sort_records(records: list[dict], mode: str) -> list[dict]:
 
 def merge_sort(records: list[dict], mode: str = "absolute") -> list[dict]:
     """Return eligible stock records ranked best to worst with merge sort.
-
-    The implementation manually divides and merges lists. It does not use
-    Python's built-in sorting methods and does not modify the input list.
     """
     if mode not in ["gains", "losses", "absolute"]:
         raise ValueError("mode must be 'gains', 'losses' or 'absolute'.")
