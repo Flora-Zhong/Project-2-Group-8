@@ -159,5 +159,104 @@ def top_k_heap_sort(records: list[dict], k: int, mode: str = "absolute") -> list
     top_k_results = data[-actual_k:][::-1]
     return top_k_results
 
-def merge_sort():
-    pass
+def _validate_merge_sort_arguments(k: int, mode: str) -> None:
+    """Validate the public Top-K merge sort arguments."""
+    if mode not in ["gains", "losses", "absolute"]:
+        raise ValueError("mode must be 'gains', 'losses' or 'absolute'.")
+    if isinstance(k, bool) or not isinstance(k, int):
+        raise TypeError("k must be an integer, not a boolean.")
+    if k < 0:
+        raise ValueError("k must be greater than or equal to 0.")
+
+
+def _merge_sort_is_eligible(record: dict, mode: str) -> bool:
+    """Return whether a record belongs in the requested result category."""
+    if mode == "gains":
+        return record["daily_return"] > 0
+    if mode == "losses":
+        return record["daily_return"] < 0
+    return "absolute_movement" in record
+
+
+def is_better(record_a: dict, record_b: dict, mode: str) -> bool:
+    """Return whether record_a belongs before record_b in the final ranking.
+
+    Ties are resolved by ticker alphabetically and then by the earlier date.
+    If all ranking keys match, False is returned so merge sort keeps the
+    original order of otherwise identical records.
+    """
+    if mode == "gains":
+        if record_a["daily_return"] != record_b["daily_return"]:
+            return record_a["daily_return"] > record_b["daily_return"]
+    elif mode == "losses":
+        if record_a["daily_return"] != record_b["daily_return"]:
+            return record_a["daily_return"] < record_b["daily_return"]
+    elif mode == "absolute":
+        if record_a["absolute_movement"] != record_b["absolute_movement"]:
+            return record_a["absolute_movement"] > record_b["absolute_movement"]
+    else:
+        raise ValueError("mode must be 'gains', 'losses' or 'absolute'.")
+
+    ticker_a = record_a["ticker"].upper()
+    ticker_b = record_b["ticker"].upper()
+    if ticker_a != ticker_b:
+        return ticker_a < ticker_b
+    return record_a["date"] < record_b["date"]
+
+
+def _merge(left: list[dict], right: list[dict], mode: str) -> list[dict]:
+    """Merge two ranked lists into one ranked list."""
+    merged = []
+    left_index = 0
+    right_index = 0
+
+    while left_index < len(left) and right_index < len(right):
+        if is_better(right[right_index], left[left_index], mode):
+            merged.append(right[right_index])
+            right_index += 1
+        else:
+            # Keep the left record first when all ranking keys are equal.
+            merged.append(left[left_index])
+            left_index += 1
+
+    merged.extend(left[left_index:])
+    merged.extend(right[right_index:])
+    return merged
+
+
+def _merge_sort_records(records: list[dict], mode: str) -> list[dict]:
+    """Recursively rank already-filtered records using merge sort."""
+    if len(records) <= 1:
+        return list(records)
+
+    midpoint = len(records) // 2
+    left_sorted = _merge_sort_records(records[:midpoint], mode)
+    right_sorted = _merge_sort_records(records[midpoint:], mode)
+    return _merge(left_sorted, right_sorted, mode)
+
+
+def merge_sort(records: list[dict], mode: str = "absolute") -> list[dict]:
+    """Return eligible stock records ranked best to worst with merge sort.
+
+    The implementation manually divides and merges lists. It does not use
+    Python's built-in sorting methods and does not modify the input list.
+    """
+    if mode not in ["gains", "losses", "absolute"]:
+        raise ValueError("mode must be 'gains', 'losses' or 'absolute'.")
+
+    eligible_records = [
+        record for record in records if _merge_sort_is_eligible(record, mode)
+    ]
+    return _merge_sort_records(eligible_records, mode)
+
+
+def top_k_merge_sort(
+    records: list[dict], k: int, mode: str = "absolute"
+) -> list[dict]:
+    """Return up to k records, best to worst, using merge sort from scratch."""
+    _validate_merge_sort_arguments(k, mode)
+    if k == 0:
+        return []
+
+    ranked_records = merge_sort(records, mode)
+    return ranked_records[:k]
