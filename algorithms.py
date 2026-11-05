@@ -28,8 +28,8 @@ def data_processing(filepath):
                     "ticker": ticker,
                     "date": curr_date,
                     "close": curr_close,
-                    "daily_return": round(daily_return, 3),
-                    "absolute_movement": round(abs(daily_return), 3),
+                    "daily_return": daily_return,
+                    "absolute_movement": abs(daily_return)
                 }
                 processed_records.append(record)
     return processed_records
