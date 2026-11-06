@@ -146,6 +146,7 @@ def main() -> None:
     """Run the interactive Top-K Stock Market Analysis console application."""
     records = None
     mode_by_choice = {"2": "gains", "3": "losses", "4": "absolute"}
+    loaded = False
 
     while True:
         print_menu()
@@ -155,7 +156,12 @@ def main() -> None:
             print("Goodbye.")
             return
         if choice == "1":
-            records = load_dataset()
+            if loaded:
+                print("Data already loaded.")
+            else:
+                records = load_dataset()
+                if records is not None:
+                    loaded = True
             continue
         if choice in mode_by_choice:
             if records is None:
