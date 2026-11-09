@@ -16,7 +16,8 @@ This project is a Python-based application which effectively identify the Top-K 
   - An inplace sorting algorithm.
   - Build a max heap based on the selected mode.
   - Time Complexity: O(n log n).
-  - Space Complexity: O(log n).
+  - Space Complexity for heap sort solely: O(log n).
+  - Space Complexity for the entire function O(n).
 - **Merge Sort**
   - A divide-and-conquer sorting algorithm.
   - Recursively divides the data and merge them.
